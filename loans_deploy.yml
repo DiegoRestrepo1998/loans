@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loans-dep
+  labels:
+    app: micro-loans
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: micro-loans
+  template:
+    metadata: 
+      labels:
+        app: micro-loans
+    spec: 
+      containers:
+        - name: micro-loans
+          image: dfrestrepo1998/microservicio_loans:1.0.0
+          ports:
+          - containerPort: 8090
+          env:
+          - name: SPRING_PROFILES_ACTIVE
+            valueFrom:
+              configMapKeyRef: 
+                name: micropro-configmap
+                key: profiles-active
+          - name: SPRING_CONFIG_IMPORT
+            valueFrom:
+              configMapKeyRef: 
+                name: micropro-configmap
+                key: config-import   
+          - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            valueFrom:
+              configMapKeyRef: 
+                name: micropro-configmap
+                key: eureka-serviceurl  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: micro-loans-service
+spec:
+  selector:
+    app: micro-loans
+  ports:
+    - protocol: TCP
+      port: 8090
+      targetPort: 8090
